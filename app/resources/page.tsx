@@ -1,12 +1,14 @@
-import RightPanel from "@/components/RightPanel";
-import DashboardBody from "@/components/DashboardBody";
+"use client";
 
-export default function Page() {
+import ResourcesBody from "@/components/ResourcesBody";
+import RightPanel from "@/components/RightPanel";
+
+export default function ResourcesPage() {
   return (
     <div className="flex flex-1 min-h-screen bg-gray-50">
-      {/* Dashboard Body */}
+      {/* Resources Body */}
       <div className="flex-1 p-4 md:p-6 overflow-y-auto">
-        <DashboardBody />
+        <ResourcesBody />
       </div>
 
       {/* Right Panel (desktop only) */}
