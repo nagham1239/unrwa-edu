@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Edit, Save, X, LogOut, Trash2, Award, BookOpen, Calendar } from "lucide-react";
+import { Edit, Save, X, LogOut, Trash2, BookOpen, Calendar } from "lucide-react";
 import Link from "next/link";
 
 interface Student {
@@ -18,7 +18,6 @@ interface Course {
   subject: string;
   title: string;
   thumbnail?: string;
-  color?: string;
 }
 
 interface Booking {
@@ -34,31 +33,32 @@ export default function ProfileBody() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState("");
-  const [editedGrade, setEditedGrade] = useState("Not specified");
   const [editedBio, setEditedBio] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
-  const defaultProfileImage =
-    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..."; // your placeholder
+  const defaultProfileImage = "/placeholder.png";
 
   // Fetch student
   const fetchStudent = async () => {
     try {
       const res = await fetch("/api/students");
+      if (!res.ok) throw new Error("Failed to fetch students");
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const s = data[0];
-        setStudent({
-          ...s,
-          profileImage: s.profileImage || defaultProfileImage,
-        });
-        setEditedName(s.name);
-        setEditedGrade(s.grade || "Not specified");
-        setEditedBio(s.bio || "");
-      }
+      const s = Array.isArray(data) ? data[0] : data;
+      if (!s) return;
+      setStudent({
+        ...s,
+        profileImage: s.profileImage || defaultProfileImage,
+      });
+      setEditedName(s.name);
+      setEditedBio(s.bio || "");
+      setSelectedFile(null);
+      setPreviewUrl(null);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch student:", err);
     }
   };
 
@@ -66,6 +66,7 @@ export default function ProfileBody() {
   const fetchCourses = async () => {
     try {
       const res = await fetch("/api/courses");
+      if (!res.ok) throw new Error("Failed to fetch courses");
       const data = await res.json();
       if (Array.isArray(data)) setCourses(data);
     } catch (err) {
@@ -77,6 +78,7 @@ export default function ProfileBody() {
   const fetchBookings = async () => {
     try {
       const res = await fetch("/api/bookings");
+      if (!res.ok) throw new Error("Failed to fetch bookings");
       const data: Booking[] = await res.json();
       setBookings(data.filter((b) => b.status === "confirmed"));
     } catch (err) {
@@ -91,27 +93,87 @@ export default function ProfileBody() {
     fetchBookings();
   }, []);
 
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  // Save updated profile
   const saveProfile = async () => {
     if (!student) return;
+
     try {
       setLoading(true);
-      const res = await fetch(`/api/students/${student._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: editedName,
-          grade: editedGrade,
-          bio: editedBio,
-          profileImage: student.profileImage || defaultProfileImage,
-        }),
-      });
-      const updated = await res.json();
-      setStudent(updated);
+
+      let res: Response;
+      if (selectedFile) {
+        // Use FormData for file upload
+        const formData = new FormData();
+        formData.append("name", editedName.trim());
+        formData.append("bio", editedBio.trim());
+        formData.append("profileImage", selectedFile);
+
+        console.log("Sending FormData with file");  // Debug log
+
+        res = await fetch(`/api/students/${student._id}`, {
+          method: "PUT",
+          body: formData,  // No Content-Type header; let browser set it
+        });
+      } else {
+        // Use JSON for text-only updates
+        const payload = {
+          name: editedName.trim(),
+          bio: editedBio.trim(),
+        };
+
+        console.log("Sending JSON payload:", payload);  // Debug log
+
+        res = await fetch(`/api/students/${student._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      console.log("Response status:", res.status);  // Debug log
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Save failed response:", errText);
+        throw new Error(`Save failed with status ${res.status}: ${errText}`);
+      }
+
+      const updatedStudent = await res.json();
+      console.log("Updated student:", updatedStudent);  // Debug log
+
+      // Update local state
+      setStudent((prev) =>
+        prev
+          ? {
+              ...prev,
+              name: updatedStudent.name,
+              bio: updatedStudent.bio,
+              profileImage: updatedStudent.profileImage || defaultProfileImage,
+            }
+          : prev
+      );
+
+      // Re-fetch to ensure UI reflects the latest data
+      await fetchStudent();
+
       setIsEditing(false);
-      alert("Profile saved!");
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      
     } catch (err) {
-      console.error(err);
-      alert("Failed to save profile");
+      console.error("Save profile error:", err);
+      
     } finally {
       setLoading(false);
     }
@@ -136,7 +198,7 @@ export default function ProfileBody() {
   if (!student) {
     return (
       <div className="text-center text-gray-600">
-        <p>Loading profile...</p>
+        <p>Loading profile…</p>
       </div>
     );
   }
@@ -160,7 +222,7 @@ export default function ProfileBody() {
       {/* Profile Card */}
       <div className="bg-white shadow-md rounded-xl p-6 flex flex-col sm:flex-row items-center gap-6">
         <img
-          src={student.profileImage || defaultProfileImage}
+          src={isEditing && previewUrl ? previewUrl : (student.profileImage || defaultProfileImage)}
           alt="Profile"
           className="w-28 h-28 rounded-full object-cover border-4 border-[#B3DDF2]"
         />
@@ -173,19 +235,18 @@ export default function ProfileBody() {
                 onChange={(e) => setEditedName(e.target.value)}
                 className="text-2xl font-bold text-[#0072BC] mb-2 border rounded px-2 py-1 w-full"
               />
-              <input
-                type="text"
-                value={editedGrade}
-                onChange={(e) => setEditedGrade(e.target.value)}
-                placeholder="Grade"
-                className="text-gray-600 mb-2 border rounded px-2 py-1 w-full"
-              />
               <textarea
                 value={editedBio}
                 onChange={(e) => setEditedBio(e.target.value)}
                 placeholder="Bio"
                 className="text-gray-600 mb-4 border rounded px-2 py-1 w-full"
                 rows={3}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="text-gray-600 mb-4 border rounded px-2 py-1 w-full"
               />
               <div className="flex gap-2">
                 <button
@@ -196,7 +257,11 @@ export default function ProfileBody() {
                   <Save className="w-4 h-4 inline mr-1" /> {loading ? "Saving..." : "Save"}
                 </button>
                 <button
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setSelectedFile(null);
+                    setPreviewUrl(null);
+                  }}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 transition"
                 >
                   <X className="w-4 h-4 inline mr-1" /> Cancel
@@ -220,7 +285,6 @@ export default function ProfileBody() {
         </div>
       </div>
 
-
       {/* Enrolled Courses */}
       <div className="bg-white shadow-md rounded-xl p-6">
         <h3 className="text-xl font-bold text-[#0072BC] mb-4 flex items-center gap-2">
@@ -233,7 +297,7 @@ export default function ProfileBody() {
             {courses.map((course) => (
               <Link
                 key={course._id}
-                href={`/courses/${course._id}`}
+                href={"/courses/"}
                 className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition"
               >
                 <img

@@ -1,5 +1,4 @@
-// page.tsx
-import ProfileBody from "@/components/ProfileBody"; // make sure the path is correct
+import ProfileBody from "@/components/ProfileBody";
 
 export default function ProfilePage() {
   return (

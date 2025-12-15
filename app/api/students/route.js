@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { connectMongo } from "@/lib/mongodb";
+import { connectMongo } from "@/lib/mongodb";  // Fixed: Use named import
 import Student from "@/models/Student";
 
 // GET all students
@@ -28,7 +28,7 @@ export async function POST(req) {
       name: body.name,
       registrationNumber: body.registrationNumber,
       profileImage: body.profileImage || "/placeholder.png",
-      grade: body.grade || "Not specified", // set at creation, not editable later
+      grade: body.grade || "Not specified",
       bio: body.bio || "",
     });
 

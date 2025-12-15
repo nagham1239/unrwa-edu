@@ -279,7 +279,8 @@ export default function BookingBody() {
       </section>
 
       {/* Upcoming Sessions */}
-      <section>
+      <section className="block lg:hidden">
+
         <h3 className="text-xl font-bold text-[#0072BC] flex items-center gap-2 mb-6">
           <Calendar className="w-5 h-5" /> Upcoming Sessions
         </h3>

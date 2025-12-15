@@ -266,7 +266,7 @@ export default function DashboardBody() {
 
                 <div className="flex items-center justify-between">
                   <Link
-                    href={`/courses/${course._id}`}
+                    href={"/courses"}
                     className="px-4 py-1 bg-[#B3DDF2] text-[#0072BC] rounded-full text-sm font-medium hover:bg-[#99CCE6] transition-transform duration-300 hover:scale-105"
                   >
                     Go to Course
@@ -288,7 +288,7 @@ export default function DashboardBody() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-[#0072BC]">Your Teachers</h3>
           <Link
-            href="/teachers"
+            href="/bookings"
             className="text-sm text-[#0072BC] hover:underline flex items-center gap-1 transition-transform duration-300 hover:scale-105"
           >
             View All Teachers
