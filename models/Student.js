@@ -12,6 +12,7 @@ const StudentSchema = new mongoose.Schema(
     profileImage: { type: String, default: "/placeholder.png" },
     grade: { type: String, default: "Not specified" }, // immutable
     bio: { type: String, default: "" }, // editable
+    teacherId: { type: mongoose.Schema.Types.ObjectId, ref: "Teacher", required: false }, // Link to teacher (optional for flexibility)
   },
   { timestamps: true }
 );

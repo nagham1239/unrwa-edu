@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import Teacher from "../../../models/Teacher.js";
-import { connectMongo } from "../../../lib/mongodb.js";
+import Teacher from "@/models/Teacher.js";
+import { connectMongo } from "@/lib/mongodb"; 
 
 // GET all teachers
 export async function GET() {

@@ -8,6 +8,7 @@ const TeacherSchema = new Schema(
     tags: [{ type: String }],
     color: { type: String },
     availability: [{ type: String }],
+    students: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }], // Reverse link: array of student IDs (optional)
   },
   { timestamps: true }
 );

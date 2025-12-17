@@ -1,12 +1,18 @@
+// next.config.ts
 import type { NextConfig } from "next";
 
-// next.config.js
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   images: {
-    domains: ["i.pinimg.com"], // allow external images from Pinterest
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.pinimg.com",
+        port: "",
+        pathname: "/**",
+      },
+      // Add more if needed
+    ],
   },
 };
 
 export default nextConfig;
-

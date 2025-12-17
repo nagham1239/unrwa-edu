@@ -325,7 +325,10 @@ export default function ProfileBody() {
             {bookings.map((b) => (
               <li key={b._id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-800">{b.teacherId.subject} with {b.teacherId.name}</p>
+                  <p className="font-medium text-gray-800">
+  {b.teacherId?.subject ? `${b.teacherId.subject} with ${b.teacherId.name}` : "Unknown Teacher"}
+</p>
+
                   <p className="text-xs text-gray-500">{b.timeSlot}</p>
                 </div>
                 <button

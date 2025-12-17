@@ -191,57 +191,49 @@ export default function RightPanel() {
           })}
         </div>
 
-        {/* ===== SELECTED DAY DETAILS ===== */}
-        {selectedDayBookings.length > 0 && (
-          <div className="mt-4 border-t pt-3">
-            <h4 className="text-sm font-semibold text-[#0072BC] mb-2">
-              Lessons on day {selectedDay}
-            </h4>
+        {/* SELECTED DAY DETAILS */}
+{selectedDayBookings.length > 0 && (
+  <div className="mt-4 border-t pt-3">
+    <h4 className="text-sm font-semibold text-[#0072BC] mb-2">
+      Lessons on day {selectedDay}
+    </h4>
 
-            <ul className="text-xs text-gray-600 space-y-1">
-              {selectedDayBookings.map((b) => (
-                <li key={b._id} className="flex justify-between">
-                  <span>
-                    {b.teacherId.subject} with {b.teacherId.name}
-                  </span>
-                  <span className="text-gray-400">{b.timeSlot}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+    <ul className="text-xs text-gray-600 space-y-1">
+      {selectedDayBookings.map((b) => (
+        <li key={b._id} className="flex justify-between">
+          <span>
+            {b.teacherId ? `${b.teacherId.subject} with ${b.teacherId.name}` : "Teacher not assigned"}
+          </span>
+          <span className="text-gray-400">{b.timeSlot}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
-      {/* ===== UPCOMING LESSONS ===== */}
-      <div className="bg-white rounded-2xl p-6 shadow-md animate-fadeIn transform transition duration-500 hover:scale-[1.01]">
-        <h5 className="font-semibold mb-3 text-[#0072BC]">
-          Upcoming Online Lessons
-        </h5>
+{/* UPCOMING LESSONS */}
+{bookings.length === 0 ? (
+  <p className="text-gray-500 text-sm">No upcoming sessions</p>
+) : (
+  <ul className="text-sm text-gray-600 space-y-3">
+    {bookings.map((b) => (
+      <li key={b._id} className="flex items-center justify-between hover:text-[#0072BC] transition">
+        <div>
+          {b.teacherId ? `${b.teacherId.subject} with ${b.teacherId.name}` : "Teacher not assigned"}
+          <div className="text-xs text-gray-400">{b.timeSlot}</div>
+        </div>
+        <button
+          disabled={loading}
+          onClick={() => deleteBooking(b._id)}
+          className="p-1 text-red-500 hover:text-red-700 transition"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </li>
+    ))}
+  </ul>
+)}
 
-        {bookings.length === 0 ? (
-          <p className="text-gray-500 text-sm">No upcoming sessions</p>
-        ) : (
-          <ul className="text-sm text-gray-600 space-y-3">
-            {bookings.map((b) => (
-              <li
-                key={b._id}
-                className="flex items-center justify-between hover:text-[#0072BC] transition"
-              >
-                <div>
-                  {b.teacherId.subject} with {b.teacherId.name}
-                  <div className="text-xs text-gray-400">{b.timeSlot}</div>
-                </div>
-                <button
-                  disabled={loading}
-                  onClick={() => deleteBooking(b._id)}
-                  className="p-1 text-red-500 hover:text-red-700 transition"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

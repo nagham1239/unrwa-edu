@@ -291,10 +291,16 @@ export default function BookingBody() {
             {myBookings.map((b) => (
               <li key={b._id} className="p-3 bg-white rounded-md shadow-sm flex justify-between items-center">
                 <div>
-                  <p className="font-medium text-gray-800">{typeof b.teacherId === "object" ? b.teacherId.name : b.teacherName}</p>
-                  <p className="text-sm text-gray-600">{typeof b.teacherId === "object" ? b.teacherId.subject : ""}</p>
-                  <p className="text-xs text-gray-500">{b.timeSlot} — {b.status}</p>
-                </div>
+                 <p className="font-medium text-gray-800">
+  {b.teacherId && typeof b.teacherId === "object"
+    ? b.teacherId.name
+    : b.teacherName || "Unknown Teacher"}
+</p>
+<p className="text-sm text-gray-600">
+  {b.teacherId && typeof b.teacherId === "object" ? b.teacherId.subject : ""}
+</p>
+<p className="text-xs text-gray-500">{b.timeSlot} — {b.status}</p>
+               </div>
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); deleteBooking(b._id); }}
